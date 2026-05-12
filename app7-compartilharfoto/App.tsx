@@ -38,16 +38,37 @@ export default function App() {
     }
   }
 
+  // async function savePhoto() {
+  //   if (photo && photo.length > 0) {
+  //     await MediaLibrary.saveToLibraryAsync(photo).then(res =>{
+  //       alert('Foto salva com sucesso!');
+  //     })
+  //     .catch(err => {
+  //       alert('Erro ao salvar foto: ' + err.message);
+  //     });
+  //   }
+  // }
+
+
   async function savePhoto() {
-    if (photo && photo.length > 0) {
-      await MediaLibrary.saveToLibraryAsync(photo).then(res =>{
-        alert('Foto salva com sucesso!');
-      })
-      .catch(err => {
-        alert('Erro ao salvar foto: ' + err.message);
-      });
-    }
+  if (!photo) return;
+
+  // Solicita permissão
+  const { status } = await MediaLibrary.requestPermissionsAsync();
+
+  if (status !== 'granted') {
+    alert('Permissão negada para acessar a galeria');
+    return;
   }
+
+  try {
+    await MediaLibrary.saveToLibraryAsync(photo);
+
+    alert('Foto salva com sucesso!');
+  } catch (err: any) {
+    alert('Erro ao salvar foto: ' + err.message);
+  }
+}
 
   const onCameraReady = () => {
     setIsCameraReady(true)
