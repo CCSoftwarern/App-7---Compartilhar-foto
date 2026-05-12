@@ -1,6 +1,8 @@
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useRef, useState } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as MediaLibrary from 'expo-media-library';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function App() {
   const [facing, setFacing] = useState<CameraType>('back');
@@ -28,24 +30,24 @@ export default function App() {
   }
 
   //Permite tirar uma foto e armanzenar a referência em uma variável de estado
-  function takePhoto() {
-
-    //A partir do objeto camera ref deve ser chamado o método takePictureAsync: 
-    //cameraRef.current.takePictureAsync...
-    cameraRef.current?.takePictureAsync()
-      .then(photo => {
-        setPhoto(photo.uri);
-        console.log('Foto tirada:', photo.uri);
-      })
-      .catch(error => {
-        console.error('Erro ao tirar foto:', error);
+  async function takePhoto() {
+    if (cameraRef.current && isCameraReady) {
+      await cameraRef.current.takePictureAsync().then(data => {
+        setPhoto(data.uri);
       });
-
+    }
   }
 
-  //função para compartilhar foto
-  function sharePhoto() {
-    
+  async function savePhoto() {
+    if (photo && photo.length > 0) {
+      await MediaLibrary.saveToLibraryAsync(photo).then(res =>{
+        alert('Foto salva com sucesso!');
+      })
+      .catch(err => {
+        alert('Erro ao salvar foto: ' + err.message);
+      });
+    }
+  }
 
   const onCameraReady = () => {
     setIsCameraReady(true)
@@ -59,10 +61,19 @@ export default function App() {
                   onCameraReady={onCameraReady}/>
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-          <Text style={styles.text}>Flip</Text>
+          <Text style={styles.text}>
+            <Ionicons name="camera-reverse-outline" size={32} color="white" />
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={takePhoto}>
-          <Text style={styles.text} disabled={!isCameraReady}>Tirar foto</Text>
+          <Text style={styles.text} disabled={!isCameraReady}>
+            <Ionicons name="camera-outline" size={32} color="white" />
+          </Text>
+        </TouchableOpacity>
+                <TouchableOpacity style={styles.button} onPress={savePhoto}>
+          <Text style={styles.text} disabled={!isCameraReady}>
+              <Ionicons name="save-outline" size={32} color="white" />
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
