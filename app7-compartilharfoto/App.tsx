@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { Ionicons } from '@expo/vector-icons';
+import * as Sharing from 'expo-sharing';
 
 export default function App() {
   const [facing, setFacing] = useState<CameraType>('back');
@@ -49,6 +50,26 @@ export default function App() {
   //   }
   // }
 
+async function compartilharFoto() {
+  if (!photo) return;
+
+  const disponivel = await Sharing.isAvailableAsync();
+
+  if (!disponivel) {
+    alert('Compartilhamento não disponível neste dispositivo');
+    return;
+  }
+
+  try {
+    await Sharing.shareAsync(photo, {
+      mimeType: 'image/jpeg',
+      dialogTitle: 'Compartilhar foto',
+    });
+  } catch (error: any) {
+    alert('Erro ao compartilhar: ' + error.message);
+  }
+}
+
 
   async function savePhoto() {
   if (!photo) return;
@@ -91,11 +112,17 @@ export default function App() {
             <Ionicons name="camera-outline" size={32} color="white" />
           </Text>
         </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={savePhoto}>
+        <TouchableOpacity style={styles.button} onPress={savePhoto}>
           <Text style={styles.text} disabled={!isCameraReady}>
               <Ionicons name="save-outline" size={32} color="white" />
           </Text>
         </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={compartilharFoto}>
+          <Text style={styles.text} disabled={!isCameraReady}>
+              <Ionicons name="share-outline" size={32} color="white" />
+          </Text>
+        </TouchableOpacity>
+
       </View>
     </View>
   );
